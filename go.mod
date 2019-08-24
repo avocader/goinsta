@@ -1,3 +1,3 @@
-module github.com/ryumaev/goinsta/v2
+module github.com/ryumaev/goinsta/v3
 
 go 1.12

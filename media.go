@@ -1067,7 +1067,7 @@ func (insta *Instagram) postPhoto(photo io.Reader, photoCaption string, quality 
 	req.Header.Set("Accept-Encoding", "gzip, deflate")
 	req.Header.Set("Content-type", w.FormDataContentType())
 	req.Header.Set("Connection", "close")
-	req.Header.Set("User-Agent", goInstaUserAgent)
+	req.Header.Set("User-Agent", insta.userAgent)
 
 	resp, err := insta.c.Do(req)
 	if err != nil {
@@ -1102,7 +1102,7 @@ func (insta *Instagram) postPhoto(photo io.Reader, photoCaption string, quality 
 		"source_type":  4,
 		"caption":      photoCaption,
 		"upload_id":    strconv.FormatInt(uploadID, 10),
-		"device":       goInstaDeviceSettings,
+		"device":       insta.device,
 		"edits": map[string]interface{}{
 			"crop_original_size": []int{width * 1.0, height * 1.0},
 			"crop_center":        []float32{0.0, 0.0},

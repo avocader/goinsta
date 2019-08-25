@@ -90,7 +90,7 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 	req.Header.Set("Connection", o.Connection)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Set("Accept-Language", "en-US")
-	req.Header.Set("User-Agent", goInstaUserAgent)
+	req.Header.Set("User-Agent", insta.userAgent)
 	req.Header.Set("X-IG-App-ID", fbAnalytics)
 	req.Header.Set("X-IG-Capabilities", igCapabilities)
 	req.Header.Set("X-IG-Connection-Type", connType)

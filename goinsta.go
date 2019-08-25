@@ -3,6 +3,7 @@ package goinsta
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -45,6 +46,9 @@ type Instagram struct {
 	pid string
 	// ads id
 	adid string
+	//
+	device    device
+	userAgent string
 
 	// Instagram objects
 
@@ -93,7 +97,7 @@ func (inst *Instagram) SetPhoneID(id string) {
 }
 
 // New creates Instagram structure
-func New(username, password string) *Instagram {
+func New(username, password string, device string) *Instagram {
 	// this call never returns error
 	jar, _ := cookiejar.New(nil)
 	inst := &Instagram{
@@ -111,6 +115,12 @@ func New(username, password string) *Instagram {
 			Jar: jar,
 		},
 	}
+	if v, contains := devices[device]; contains {
+		inst.device = v
+	} else {
+		inst.device = devices[defaultDevice]
+	}
+
 	inst.init()
 
 	return inst
@@ -125,6 +135,8 @@ func (inst *Instagram) init() {
 	inst.Feed = newFeed(inst)
 	inst.Contacts = newContacts(inst)
 	inst.Locations = newLocation(inst)
+
+	inst.setUserAgent()
 }
 
 // SetProxy sets proxy for connection.
@@ -502,4 +514,18 @@ func (inst *Instagram) GetMedia(o interface{}) (*FeedMedia, error) {
 		NextID: o,
 	}
 	return media, media.Sync()
+}
+
+func (insta *Instagram) setUserAgent() {
+	d := insta.device
+	insta.userAgent = fmt.Sprintf("Instagram %s Android (%s/%s; %s; %s; %s; %s; %s; %s; en_US)",
+		d.InstagramVersion,
+		d.AndroidVersion,
+		d.AndroidRelease,
+		d.Dpi,
+		d.Resolution,
+		d.Manufacturer,
+		d.Device,
+		d.Model,
+		d.Cpu)
 }

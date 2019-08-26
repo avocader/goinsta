@@ -518,7 +518,7 @@ func (inst *Instagram) GetMedia(o interface{}) (*FeedMedia, error) {
 
 func (insta *Instagram) setUserAgent() {
 	d := insta.device
-	insta.userAgent = fmt.Sprintf("Instagram %s Android (%s/%s; %s; %s; %s; %s; %s; %s; en_US)",
+	insta.userAgent = fmt.Sprintf("Instagram %s Android (%s/%s; %s; %s; %s; %s; %s; %s; ru_RU, %s)",
 		d.InstagramVersion,
 		d.AndroidVersion,
 		d.AndroidRelease,

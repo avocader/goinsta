@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
-	neturl "net/url"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -97,7 +97,7 @@ func (inst *Instagram) SetPhoneID(id string) {
 }
 
 // New creates Instagram structure
-func New(username, password string, device string) *Instagram {
+func New(username string, password string, device string, proxy *url.URL) *Instagram {
 	// this call never returns error
 	jar, _ := cookiejar.New(nil)
 	inst := &Instagram{
@@ -110,7 +110,9 @@ func New(username, password string, device string) *Instagram {
 		pid:  generateUUID(),
 		c: &http.Client{
 			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
+				Proxy: func(request *http.Request) (i *url.URL, e error) {
+					return proxy, nil
+				},
 			},
 			Jar: jar,
 		},

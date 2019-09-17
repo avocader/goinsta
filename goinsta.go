@@ -142,8 +142,8 @@ func (inst *Instagram) init() {
 }
 
 // SetProxy sets proxy for connection.
-func (inst *Instagram) SetProxy(url string, insecure bool) error {
-	uri, err := neturl.Parse(url)
+func (inst *Instagram) SetProxy(url1 string, insecure bool) error {
+	uri, err := url.Parse(url1)
 	if err == nil {
 		inst.c.Transport = &http.Transport{
 			Proxy: http.ProxyURL(uri),
@@ -171,7 +171,7 @@ func (inst *Instagram) Save() error {
 
 // Export exports *Instagram object options
 func (inst *Instagram) Export(path string) error {
-	url, err := neturl.Parse(goInstaAPIUrl)
+	url, err := url.Parse(goInstaAPIUrl)
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (inst *Instagram) Export(path string) error {
 
 // Export exports selected *Instagram object options to an io.Writer
 func Export(inst *Instagram, writer io.Writer) error {
-	url, err := neturl.Parse(goInstaAPIUrl)
+	url, err := url.Parse(goInstaAPIUrl)
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func Export(inst *Instagram, writer io.Writer) error {
 //
 // This function does not set proxy automatically. Use SetProxy after this call.
 func ImportReader(r io.Reader) (*Instagram, error) {
-	url, err := neturl.Parse(goInstaAPIUrl)
+	url, err := url.Parse(goInstaAPIUrl)
 	if err != nil {
 		return nil, err
 	}

@@ -870,7 +870,7 @@ func (media *FeedMedia) SetID(id interface{}) {
 }
 
 // Sync updates media values.
-func (media *FeedMedia) Sync() error {
+func (media *FeedMedia) Update() error {
 	id := media.ID()
 	insta := media.inst
 
@@ -900,6 +900,54 @@ func (media *FeedMedia) Sync() error {
 	media.endpoint = urlMediaInfo
 	media.inst = insta
 	media.NextID = id
+	media.setValues()
+	return err
+}
+
+func (media *FeedMedia) Sync(options map[string]bool) error {
+	insta := media.inst
+	additionalData := map[string]interface{}{
+		"is_prefetch":       0,
+		"phone_id":          insta.pid,
+		"device_id":         insta.uuid,
+		"client_session_id": insta.sessionId,
+		"battery_level":     100,
+		"is_charging":       0,
+		"will_sound_on":     0,
+		"is_on_screen":      true,
+		"timezone_offset":   "+0300",
+	}
+	if _, ok := options["is_pull_to_refresh"]; ok {
+		additionalData["reason"] = "pull_to_refresh"
+		additionalData["is_pull_to_refresh"] = "1"
+	} else {
+		additionalData["reason"] = "cold_start_fetch"
+		additionalData["is_pull_to_refresh"] = "0"
+	}
+	if _, ok := options["push_disabled"]; ok {
+		additionalData["push_disabled"] = "true"
+	}
+	if _, ok := options["recovered_from_crash"]; ok {
+		additionalData["recovered_from_crash"] = "1"
+	}
+
+	data := insta.prepareDataQuery(additionalData)
+
+	body, err := insta.sendRequest(
+		&reqOptions{
+			Endpoint: media.endpoint,
+			Query:    data,
+			IsPost:   true,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	m := FeedMedia{}
+	err = json.Unmarshal(body, &m)
+	*media = m
+	media.inst = insta
 	media.setValues()
 	return err
 }

@@ -26,7 +26,7 @@ type InboxItem struct {
 
 	// Media is image or video
 	Media struct {
-		ID                   string `json:"id"`
+		ID                   int64  `json:"id"`
 		Images               Images `json:"image_versions2"`
 		OriginalWidth        int    `json:"original_width"`
 		OriginalHeight       int    `json:"original_height"`
@@ -150,6 +150,25 @@ func (inbox *Inbox) Sync() error {
 		"persistentBadging": "true",
 		"use_unified_inbox": "true",
 	})
+}
+
+func (inbox *Inbox) GetRankedRecipients(mode string, showThreads bool) error {
+	data := map[string]string{
+		"mode":              mode,
+		"use_unified_inbox": "true",
+		"show_threads":      fmt.Sprintf("%t", showThreads),
+	}
+	_, err := inbox.inst.sendRequest(&reqOptions{ //todo save in inbox
+		Endpoint: urlInboxRankedRecipients,
+		Query:    data,
+		IsPost:   true,
+	})
+	return err
+}
+
+func (inbox *Inbox) GetPresence() error { //todo save in inbox
+	_, err := inbox.inst.sendSimpleRequest(urlInboxPresence)
+	return err
 }
 
 // SyncPending updates inbox pending messages.

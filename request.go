@@ -2,8 +2,10 @@ package goinsta
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -89,21 +91,26 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 
 	req.Header.Set("Connection", o.Connection)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-	req.Header.Set("Accept-Language", "en-US")
+	req.Header.Set("Accept-Language", "ru-RU")
 	req.Header.Set("User-Agent", insta.userAgent)
 	req.Header.Set("X-IG-App-ID", fbAnalytics)
 	req.Header.Set("X-IG-Capabilities", igCapabilities)
 	req.Header.Set("X-IG-Connection-Type", connType)
 	req.Header.Set("X-IG-Connection-Speed", fmt.Sprintf("%dkbps", acquireRand(1000, 3700)))
-	req.Header.Set("X-IG-Bandwidth-Speed-KBPS", "-1.000")
-	req.Header.Set("X-IG-Bandwidth-TotalBytes-B", "0")
-	req.Header.Set("X-IG-Bandwidth-TotalTime-MS", "0")
+	req.Header.Set("X-IG-Bandwidth-Speed-KBPS", strconv.FormatInt(acquireRand(5000, 20000), 10))
+	req.Header.Set("X-IG-Bandwidth-TotalBytes-B", strconv.FormatInt(acquireRand(200000, 1000000), 10))
+	req.Header.Set("X-IG-Bandwidth-TotalTime-MS", strconv.FormatInt(acquireRand(10, 170), 10))
+	req.Header.Set("X-IG-Prefetch-Request", "foreground")
+	req.Header.Set("X-IG-VP9-Capable", "false")
+	req.Header.Set("X-FB-HTTP-Engine", "Liger")
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept-Encoding", "gzip,deflate")
+	req.Header.Set("Cookie2", "$Version=1")
 
 	resp, err := insta.c.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	u, _ = url.Parse(goInstaAPIUrl)
 	for _, value := range insta.c.Jar.Cookies(u) {
@@ -112,7 +119,17 @@ func (insta *Instagram) sendRequest(o *reqOptions) (body []byte, err error) {
 		}
 	}
 
-	body, err = ioutil.ReadAll(resp.Body)
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		defer reader.Close()
+	default:
+		reader = resp.Body
+		defer resp.Body.Close()
+	}
+
+	body, err = ioutil.ReadAll(reader)
 	if err == nil {
 		err = isError(resp.StatusCode, body)
 	}
@@ -149,13 +166,14 @@ func (insta *Instagram) prepareData(other ...map[string]interface{}) (string, er
 		"_uuid":      insta.uuid,
 		"_csrftoken": insta.token,
 	}
-	if insta.Account != nil && insta.Account.ID != 0 {
+	/*if insta.Account != nil && insta.Account.ID != 0 {
 		data["_uid"] = strconv.FormatInt(insta.Account.ID, 10)
-	}
-
-	for i := range other {
-		for key, value := range other[i] {
-			data[key] = value
+	}*/
+	if other != nil {
+		for i := range other {
+			for key, value := range other[i] {
+				data[key] = value
+			}
 		}
 	}
 	b, err := json.Marshal(data)
@@ -178,7 +196,7 @@ func (insta *Instagram) prepareDataQuery(other ...map[string]interface{}) map[st
 	return data
 }
 
-func acquireRand(min, max int) int {
+func acquireRand(min, max int64) int64 {
 	rand.Seed(time.Now().Unix())
-	return rand.Intn(max-min) + min
+	return rand.Int63n(max-min) + min
 }

@@ -28,11 +28,20 @@ func (time *Timeline) Get() *FeedMedia {
 }
 
 // Reel returns slice of Reel
-func (time *Timeline) Stories() (*Tray, error) {
-	body, err := time.inst.sendSimpleRequest(urlStories)
+func (time *Timeline) Stories(reason string) (*Tray, error) {
+	body := time.inst.prepareDataQuery(map[string]interface{}{
+		"supported_capabilities_new": supportedCapabilities,
+		"reason":                     reason,
+	})
+
+	res, err := time.inst.sendRequest(&reqOptions{
+		Endpoint: urlStories,
+		Query:    body,
+		IsPost:   true,
+	})
 	if err == nil {
 		tray := &Tray{}
-		err = json.Unmarshal(body, tray)
+		err = json.Unmarshal(res, tray)
 		if err != nil {
 			return nil, err
 		}

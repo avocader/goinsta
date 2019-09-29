@@ -3,19 +3,32 @@ package goinsta
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 )
 
-// ConfigFile is a structure to store the session information so that can be exported or imported.
-type ConfigFile struct {
-	ID        int64          `json:"id"`
-	User      string         `json:"username"`
-	DeviceID  string         `json:"device_id"`
-	UUID      string         `json:"uuid"`
-	RankToken string         `json:"rank_token"`
-	Token     string         `json:"token"`
-	PhoneID   string         `json:"phone_id"`
-	Cookies   []*http.Cookie `json:"cookies"`
+// Session is a structure to store the session information so that can be exported or imported.
+type Session struct {
+	ID          int64             `json:"id"`
+	User        string            `json:"username"`
+	Cookies     map[string]string `json:"cookies"`
+	TimingValue Timings           `json:"timing_value"`
+	Device      device            `json:"device"`
+	UserAgent   string            `json:"user_agent"`
+	UUIDs       UUIDs             `json:"uui_ds"`
+}
+
+type UUIDs struct {
+	UUID            string `json:"uuid"`
+	ClientSessionID string `json:"client_session_id"`
+	AdvertisingID   string `json:"advertising_id"`
+	DeviceID        string `json:"device_id"`
+	RankToken       string `json:"rank_token"`
+	Token           string `json:"token"`
+	PhoneID         string `json:"phone_id"`
+}
+
+type Timings struct {
+	LastLogin       int64 `json:"last_login"`
+	LastExperiments int64 `json:"last_experiments"`
 }
 
 // School is void structure (yet).

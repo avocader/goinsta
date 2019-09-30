@@ -100,7 +100,7 @@ func (inst *Instagram) SetPhoneID(id string) {
 }
 
 // New creates Instagram structure
-func New(username string, password string, device string, proxy *url.URL, session *Session) (error, *Instagram) {
+func New(username string, password string, device string, proxy *url.URL, session *Session) (*Instagram, error) {
 	var inst *Instagram
 	if session == nil {
 		// this call never returns error
@@ -144,7 +144,7 @@ func New(username string, password string, device string, proxy *url.URL, sessio
 		jar, _ := cookiejar.New(nil)
 		urlApi, err := url.Parse(goInstaAPIUrl)
 		if err != nil {
-			return err, nil
+			return nil, err
 		}
 		jar.SetCookies(urlApi, mapToCookies(session.Cookies))
 		inst = &Instagram{
@@ -171,7 +171,7 @@ func New(username string, password string, device string, proxy *url.URL, sessio
 		}
 	}
 	inst.init()
-	return nil, inst
+	return inst, nil
 }
 
 func (inst *Instagram) init() {

@@ -130,7 +130,7 @@ func New(username string, password string, device string, proxy *url.URL, sessio
 		} else {
 			inst.device = devices[defaultDevice]
 		}
-		inst.userAgent = fmt.Sprintf("Instagram %s Android (%s/%s; %s; %s; %s; %s; %s; %s; ru_RU)",
+		inst.userAgent = fmt.Sprintf("Instagram %s Android (%s/%s; %s; %s; %s; %s; %s; %s; en_US)",
 			inst.device.InstagramVersion,
 			inst.device.AndroidVersion,
 			inst.device.AndroidRelease,

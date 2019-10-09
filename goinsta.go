@@ -451,7 +451,17 @@ func (inst *Instagram) Login() error {
 			},
 		)
 		if err != nil {
-			return err
+			switch err.(type) {
+			case ErrorChallenge:
+				{
+					res, err := inst.solveChallenge(err.(ErrorChallenge))
+					if err == nil {
+						body = res
+					} else {
+						return err
+					}
+				}
+			}
 		}
 		inst.pass = ""
 
@@ -467,6 +477,83 @@ func (inst *Instagram) Login() error {
 		inst.rankToken = strconv.FormatInt(inst.Account.ID, 10) + "_" + inst.uuid
 		inst.zrToken()
 		return err
+	}
+}
+
+func (inst *Instagram) solveChallenge(challenge ErrorChallenge) ([]byte, error) {
+	challengeUrl := challenge.Challenge.ApiPath[1:]
+	options, err := inst.loadChoices(challengeUrl)
+	if err == nil {
+		fmt.Println("Challenge options: ")
+		for _, option := range options {
+			fmt.Println(option)
+		}
+		var option int
+		fmt.Printf("Enter number of option: ")
+		if _, err := fmt.Scanf("%d", &option); err != nil {
+			return nil, err
+		}
+		b, err := json.Marshal(map[string]interface{}{"choice": option})
+		if err == nil {
+			_, err := inst.sendRequest(
+				&reqOptions{
+					Endpoint: challengeUrl,
+					Query:    generateSignature(b2s(b)),
+					IsPost:   true,
+					Login:    true,
+				},
+			)
+			if err == nil {
+				var code int
+				fmt.Printf("Enter code from email")
+				_, err := fmt.Scanf("%d", &code)
+				if err == nil {
+					b, err := json.Marshal(map[string]interface{}{"security_code": code})
+					if err == nil {
+						b, err := inst.sendRequest(
+							&reqOptions{
+								Endpoint: challengeUrl,
+								Query:    generateSignature(b2s(b)),
+								IsPost:   true,
+								Login:    true,
+							},
+						)
+						return b, err
+					}
+				}
+			}
+		}
+	} else {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (inst *Instagram) loadChoices(url string) ([]string, error) {
+	res, err := inst.sendRequest(&reqOptions{
+		Endpoint: url,
+		IsPost:   false,
+		Login:    false,
+	})
+	if err == nil {
+		options := make([]string, 0)
+		optionsReq := challengeOptions{}
+		err = json.Unmarshal(res, &optionsReq)
+		if optionsReq.StepName == "select_verify_method" {
+			if optionsReq.StepData.PhoneNumber != "" {
+				options = append(options, "0 - Phone")
+			}
+			if optionsReq.StepData.Email != "" {
+				options = append(options, "1 - Email")
+			}
+		} else if optionsReq.StepName == "delta_login_review" {
+			options = append(options, "0 - It was me")
+		} else {
+			options = append(options, "0 - Default")
+		}
+		return options, nil
+	} else {
+		return nil, err
 	}
 }
 

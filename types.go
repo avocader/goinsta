@@ -49,6 +49,20 @@ type ErrorN struct {
 	ErrorType string `json:"error_type"`
 }
 
+type ErrorChallenge struct {
+	*ErrorN
+	Challenge Challenge `json:"challenge"`
+}
+
+type Challenge struct {
+	Url               string `json:"url"`
+	ApiPath           string `json:"api_path"`
+	HideWebviewHeader bool   `json:"hide_webview_header"`
+	Lock              bool   `json:"lock"`
+	Logout            bool   `json:"logout"`
+	NativeFlow        bool   `json:"native_flow"`
+}
+
 // Error503 is instagram API error
 type Error503 struct {
 	Message string
@@ -355,4 +369,20 @@ type respLikers struct {
 type threadResp struct {
 	Conversation Conversation `json:"thread"`
 	Status       string       `json:"status"`
+}
+type challengeOptions struct {
+	StepName  string   `json:"step_name"`
+	StepData  stepData `json:"step_data"`
+	UserId    int      `json:"user_id"`
+	NonceCode string   `json:"nonce_code"`
+	Status    string   `json:"status"`
+}
+
+type stepData struct {
+	Choice           string `json:"choice"`
+	FbAccessToken    string `json:"fb_access_token"`
+	BigBlueToken     string `json:"big_blue_token"`
+	GoogleOauthToken string `json:"google_oauth_token"`
+	PhoneNumber      string `json:"phone_number"`
+	Email            string `json:"email"`
 }

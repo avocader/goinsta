@@ -156,6 +156,14 @@ func isError(code int, body []byte) (err error) {
 		if err != nil {
 			return fmt.Errorf("Invalid status code: %d: %s", code, body)
 		}
+		if ierr.Message == "challenge_required" {
+			ierr1 := ErrorChallenge{}
+			err = json.Unmarshal(body, &ierr1)
+			if err != nil {
+				return fmt.Errorf("Invalid status code: %d: %s", code, body)
+			}
+			return ierr1
+		}
 		return ierr
 	}
 	return nil

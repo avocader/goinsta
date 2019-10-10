@@ -206,13 +206,13 @@ func (inst *Instagram) UnsetProxy() {
 }
 
 // Export exports *Instagram object options
-func (inst *Instagram) Export() (error, *Session) {
+func (inst *Instagram) Session() (*Session, error) {
 	urlApi, err := url.Parse(goInstaAPIUrl)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	return nil, &Session{
+	return &Session{
 		//ID:          inst.Account.ID,
 		User:        inst.user,
 		Cookies:     cookiesToMap(inst.c.Jar.Cookies(urlApi)),
@@ -220,7 +220,7 @@ func (inst *Instagram) Export() (error, *Session) {
 		UUIDs:       UUIDs{PhoneID: inst.pid, UUID: inst.uuid, ClientSessionID: inst.sessionId, DeviceID: inst.dID, AdvertisingID: inst.adid, Token: inst.token, RankToken: inst.rankToken},
 		UserAgent:   inst.userAgent,
 		TimingValue: Timings{LastLogin: inst.LastLogin, LastExperiments: inst.LastExperiments},
-	}
+	}, nil
 }
 
 func cookiesToMap(cookies []*http.Cookie) map[string]string {

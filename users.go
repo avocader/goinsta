@@ -27,14 +27,16 @@ type Users struct {
 
 func (users *Users) GetNextID() string {
 	switch s := users.NextID.(type) {
+	case nil:
+		return ""
 	case string:
 		return s
-	case int64:
-		return strconv.FormatInt(s, 10)
-	case json.Number:
-		return string(s)
+	case float64:
+		return strconv.FormatFloat(s, 'f', -1, 64)
+	default:
+		//TODO: Delete it once we make sure it doesn't panic
+		panic("unexpected NextID type")
 	}
-	return ""
 }
 
 func newUsers(inst *Instagram) *Users {

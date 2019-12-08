@@ -18,11 +18,23 @@ type Users struct {
 	err      error
 	endpoint string
 
-	Status   string `json:"status"`
-	BigList  bool   `json:"big_list"`
-	Users    []User `json:"users"`
-	PageSize int    `json:"page_size"`
-	NextID   int    `json:"next_max_id"`
+	Status   string      `json:"status"`
+	BigList  bool        `json:"big_list"`
+	Users    []User      `json:"users"`
+	PageSize int         `json:"page_size"`
+	NextID   interface{} `json:"next_max_id"`
+}
+
+func (users *Users) GetNextID() string {
+	switch s := users.NextID.(type) {
+	case string:
+		return s
+	case int64:
+		return strconv.FormatInt(s, 10)
+	case json.Number:
+		return string(s)
+	}
+	return ""
 }
 
 func newUsers(inst *Instagram) *Users {
@@ -57,7 +69,7 @@ func (users *Users) Next() bool {
 		&reqOptions{
 			Endpoint: endpoint,
 			Query: map[string]string{
-				"max_id":             strconv.Itoa(users.NextID),
+				"max_id":             users.GetNextID(),
 				"ig_sig_key_version": goInstaSigKeyVersion,
 				"rank_token":         insta.rankToken,
 			},

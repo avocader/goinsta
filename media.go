@@ -140,6 +140,7 @@ type Story struct {
 	// Use TopLikers function instead of getting it directly.
 	Toplikers                    interface{} `json:"top_likers"`
 	Likers                       []User      `json:"likers"`
+	Viewers                      []User      `json:"viewers"`
 	CommentLikesEnabled          bool        `json:"comment_likes_enabled"`
 	CommentThreadingEnabled      bool        `json:"comment_threading_enabled"`
 	HasMoreComments              bool        `json:"has_more_comments"`

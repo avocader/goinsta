@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 )
 
 // Users is a struct that stores many user's returned by many different methods.
@@ -27,14 +26,16 @@ type Users struct {
 
 func (users *Users) GetNextID() string {
 	switch s := users.NextID.(type) {
+	case nil:
+		return ""
 	case string:
 		return s
-	case int64:
-		return strconv.FormatInt(s, 10)
-	case json.Number:
-		return string(s)
+	case float64:
+		return fmt.Sprintf("%f", s)
+	default:
+		//TODO: Delete it once we make sure it doesn't panic
+		panic("unexpected NextID type")
 	}
-	return ""
 }
 
 func newUsers(inst *Instagram) *Users {

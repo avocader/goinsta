@@ -21,7 +21,21 @@ type Users struct {
 	BigList  bool   `json:"big_list"`
 	Users    []User `json:"users"`
 	PageSize int    `json:"page_size"`
-	NextID   string `json:"next_max_id"`
+	NextID   interface{} `json:"next_max_id"`
+}
+
+func (users *Users) GetNextID() string {
+	switch s := users.NextID.(type) {
+	case nil:
+		return ""
+	case string:
+		return s
+	case float64:
+		return fmt.Sprintf("%f", s)
+	default:
+		//TODO: Delete it once we make sure it doesn't panic
+		panic("unexpected NextID type")
+	}
 }
 
 func newUsers(inst *Instagram) *Users {
@@ -56,7 +70,7 @@ func (users *Users) Next() bool {
 		&reqOptions{
 			Endpoint: endpoint,
 			Query: map[string]string{
-				"max_id":             users.NextID,
+				"max_id":             users.GetNextID(),
 				"ig_sig_key_version": goInstaSigKeyVersion,
 				"rank_token":         insta.rankToken,
 			},

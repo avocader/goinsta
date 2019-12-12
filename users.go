@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 // Users is a struct that stores many user's returned by many different methods.
@@ -31,7 +32,7 @@ func (users *Users) GetNextID() string {
 	case string:
 		return s
 	case float64:
-		return fmt.Sprintf("%f", s)
+		return strconv.FormatFloat(s, 'f', -1, 64)
 	default:
 		//TODO: Delete it once we make sure it doesn't panic
 		panic("unexpected NextID type")
